@@ -31,17 +31,17 @@ Route (pages)                             Size     First Load JS
 
 Static contents는 말 그대로 콘텐츠를 따로 빌드하지 않고 보여준다.
 React Component를 HTML로 렌더링하는 최소한의 prerendering 과정만 필요하기 때문에 가장 빠르지만
-페이지가 동적으로 변하지 않기 때문에 interaction이 필요한 경우 부적절하다. [REF](https://nextjs.org/docs/pages/building-your-application/rendering/automatic-static-optimization)
+페이지가 동적으로 변하지 않기 때문에 interaction이 필요한 경우 부적절하다. [Documentation](https://nextjs.org/docs/pages/building-your-application/rendering/automatic-static-optimization)
 
 ### SSG (Static Site Generation)
 
 SSG는 배포를 위해 빌드할 때, `getStaticProps()`에서 데이터를 `fetch`하고 이를 포함하여 렌더링한다.
-즉, 클라이언트가 아무리 요청을 새로 보내도 빌드 시점의 데이터만 확인할 수 있다. [REF](https://nextjs.org/docs/pages/building-your-application/rendering/static-site-generation)
+즉, 클라이언트가 아무리 요청을 새로 보내도 빌드 시점의 데이터만 확인할 수 있다. [Documentation](https://nextjs.org/docs/pages/building-your-application/rendering/static-site-generation)
 
 ### Server Side Rendering
 
 SSR은 Next.js 배포 서버 런타임에서 데이터를 `fetch`하고 이를 포함하여 렌더링한다.
-즉, 클라이언트가 새롭게 요청을 보내면 그떄마다 새롭게 렌더링을 하여 데이터를 보내준다. [REF](https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering)
+즉, 클라이언트가 새롭게 요청을 보내면 그떄마다 새롭게 렌더링을 하여 데이터를 보내준다. [Documentation](https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering)
 
 ## app-router-demo
 
@@ -117,15 +117,45 @@ export default async function DynamicPage() {
 }
 ```
 
+### Client Component
+
+Next.js의 Client Component는 예시에 포함되어있지는 않아 정리한다.
+컴포넌트 상단에 `'use client'`라고 적으면 아래 컴포넌트는 기존에 React Function Component처럼 여러 hook을 사용할 수 있다.
+Next.js에서는 빠른 렌더링을 위해 서버에서 먼저 HTML을 렌더링하여 브라우저에 전달하고,
+`The React Server Components Payload`가 클라이언트, 서버 컴포넌트 트리 재조정 및 DOM 업데이트를 거친다
+이후 "hydrate"을 위한 JavaScript가 HTML에 적용된다.
+
+조금의 논리 비약을 거치면 아래와 같이 요약할 수 있다.
+서버에서 HTML이 먼저 렌더링되고, 이후에 클라이언트에 꼭 필요한 payload, JavaScript가 전달되어 상호작용이 가능한 웹앱을 완성한다.
+[Documentation](https://nextjs.org/docs/app/building-your-application/rendering/client-components#how-are-client-components-rendered)
+
+```jsx
+'use client'
+ 
+import { useState } from 'react'
+ 
+export default function Counter() {
+  const [count, setCount] = useState(0)
+ 
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>Click me</button>
+    </div>
+  )
+}
+```
+
 ## IMO, Lesson Learned
 
 - Page Router는 페이지 단위로 렌더링 방식을 결정할 수 있었지만, App Router에서는 어떤 React Component든 렌더링 방식을 정할 수 있게 되었다.
 - App Router에서는 SWR이나 React Query처럼 케싱 기능도 제공하기 위해서 케싱을 디폴트로 적용했다.
   - 의도는 좋았으나, 코드의 작동을 명시적으로 확인할 수 없었기에 많은 개발자가 케싱 현상에 대해 불만을 가졌고 Next.js 15 버전에서 변경될 예정이다.
-  - Vercel과 같이 React 개발진과 협업하는 거대 소프트웨어 기업에서도 이런 실수를 하는구나 싶다.
-  - 나도 나만 아아볼 수 있는 코드를 적었던 기억이 있는데, 누구든 이해할 수 있게 명확한 타입 지정과 문서화를 해야겠다고 생각했다. 
+  - Vercel과 같이 React 개발진과 협업하는 소프트웨어 기업에서도 이런 실수를 하는구나 싶다.
+  - 개인적으로 `dynamic` 변수나 `'use client`'와 같은 문법은 타입 추론이 가능했으면 좋겠다.
+  - 나도 나만 알아볼 수 있는 코드를 적었던 기억이 있는데, 누구든 이해할 수 있게 명확한 타입 지정과 문서화를 해야겠다고 생각했다.
 - 개인적으로 Next.js 공식 문서는 다소 읽기 어려웠던 면이 있다.
   - Documentation과 API 명세가 섞여있어 여러번 읽고 유튜브 검색도 해봐야 했다.
   - ChatGPT도 최신 문법에 대해서 잘 알려주진 않더라.
-  - 이런 정보를 잘 이해하는 것도 능력인 것 같고 앞으로 잘 정리해야겠따.
+  - 이런 정보를 잘 이해하는 것도 능력인 것 같고 앞으로 잘 정리해야겠다.
   - 깔끔하게 설명해준 Jack Herrington 형님에게 박수 👏
